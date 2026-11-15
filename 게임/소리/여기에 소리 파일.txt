@@ -1,0 +1,5 @@
+이 폴더에 소리 파일을 넣으면 게임이 만든 소리 대신 그 파일을 튼다.
+파일 이름은 문서/소리 목록.md 의 "파일 이름" 그대로 (예: 벨.mp3). mp3, ogg, wav 중 하나.
+없는 소리는 지금처럼 게임이 만든 소리가 난다.
+
+문고리.wav: "LockedDoorHandleJiggle" (Cough-E, Door Lock Sounds, CC0) https://opengameart.org/content/door-lock-sounds

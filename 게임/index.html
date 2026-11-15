@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>회신없음</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="커뮤니티.css">
+<link rel="stylesheet" href="게임.css">
+</head>
+<body>
+<!-- 1920x1080 무대. 플레이어는 노트북 화면만 본다. 시험 주소는 게임.js 맨 위 -->
+<div id="stage">
+  <div class="icons" id="icons">
+    <div class="ic" data-open="pc"><svg viewBox="0 0 48 48"><rect x="5" y="8" width="38" height="25" rx="3" fill="#4ea1e8"/><rect x="8" y="11" width="32" height="19" rx="1" fill="#bfe1ff"/><rect x="18" y="35" width="12" height="3" fill="#8a96a3"/><rect x="13" y="38" width="22" height="3" rx="1.5" fill="#aab4bf"/></svg>내 PC</div>
+    <div class="ic" data-open="bin"><svg viewBox="0 0 48 48"><path d="M12 14h24l-2.5 27a3 3 0 0 1-3 2.7h-13a3 3 0 0 1-3-2.7z" fill="rgba(220,235,250,.75)" stroke="#e8f2fc" stroke-width="1.5"/><rect x="9" y="10" width="30" height="5" rx="2" fill="#dfeaf5"/><path d="M19 20l1 18M24 20v18M29 20l-1 18" stroke="#9fb3c8" stroke-width="1.5"/></svg>휴지통</div>
+    <div class="ic odd-ic" data-open="web"><svg viewBox="0 0 48 48"><rect x="4" y="4" width="40" height="40" rx="11" fill="#5d5a66"/><circle cx="24" cy="25" r="9" fill="none" stroke="#fff" stroke-width="3.5"/><circle cx="34.5" cy="13.5" r="3.2" fill="#fff"/></svg><span id="appIcT"></span><b class="badge" id="dmBadge"></b></div>
+    <div class="ic" data-open="coco"><svg viewBox="0 0 48 48"><rect x="4" y="4" width="40" height="40" rx="11" fill="#fee500"/><path d="M24 13c-7.7 0-14 4.9-14 11 0 3.9 2.6 7.3 6.5 9.3L15 39l6.3-3.6c.9.1 1.8.2 2.7.2 7.7 0 14-4.9 14-11s-6.3-11-14-11z" fill="#3c1e1e"/><circle cx="18.5" cy="24" r="2" fill="#fee500"/><circle cx="24" cy="24" r="2" fill="#fee500"/><circle cx="29.5" cy="24" r="2" fill="#fee500"/></svg><span id="cocoIcT"></span><b class="badge" id="cocoBadge"></b></div>
+    <div class="ic" data-open="note"><svg viewBox="0 0 48 48"><path d="M11 4h19l9 9v31H11z" fill="#fff"/><path d="M30 4v9h9" fill="#dfe3e8"/><path d="M16 20h12M16 26h16M16 32h14" stroke="#8a96a3" stroke-width="2"/><rect x="11" y="4" width="4" height="40" fill="#f2c14e"/></svg>기록.txt</div>
+  </div>
+
+  <!-- 브라우저 + 커뮤니티 -->
+  <section class="win web hide" id="w-web" style="left:96px;top:24px;width:1080px;height:960px">
+    <div class="tabs" data-drag>
+      <div class="tab"><span class="fav" id="favT"></span><span id="tabTitle"></span><i>✕</i></div>
+      <button class="plus">+</button><div class="sp"></div>
+      <div class="ctl"><button data-act="min">─</button><button data-act="max">▢</button><button class="x" data-act="close">✕</button></div>
+    </div>
+    <div class="bar"><button id="back">←</button><button>→</button><button>↻</button><div class="url"><i id="lock">🔒</i><b id="urlHost" style="font-weight:400"></b><span id="urlPath">/yulwon/all</span></div><button>☆</button><button>⋮</button></div>
+    <div class="wb"><div class="site" id="site"></div><div class="pdfv hide" id="pdfV"></div></div>
+  </section>
+
+
+  <!-- 기록 메모장: 캠링에서 복사한 것을 붙여 넣어 모으는 곳 -->
+  <section class="win memo hide" id="w-note" style="left:1196px;top:30px;width:700px;height:520px">
+    <div class="tb" data-drag><div class="ti">📝 기록.txt - 메모장</div><div class="ctl"><button data-act="min">─</button><button data-act="max">▢</button><button class="x" data-act="close">✕</button></div></div>
+    <div class="menu"><span>파일</span><span>편집</span><span>보기</span></div>
+    <div class="wb"><textarea id="noteText" spellcheck="false" placeholder="글을 복사해서 여기에 붙여 넣는다 (마우스 오른쪽 클릭도 된다)"></textarea></div>
+    <div class="stat"><span id="noteStat">줄 1</span><span>100%</span><span>Windows (CRLF)</span><span>UTF-8</span></div>
+  </section>
+
+
+  <!-- 내 PC, 휴지통 (같은 탐색기) -->
+  <section class="win exp hide" id="w-pc" style="left:300px;top:120px;width:860px;height:560px">
+    <div class="tb" data-drag><div class="ti" id="pcTitle">내 PC</div><div class="ctl"><button data-act="min">─</button><button data-act="max">▢</button><button class="x" data-act="close">✕</button></div></div>
+    <div class="ex-bar"><button id="exUp">↑</button><div class="ex-path" id="exPath"></div></div>
+    <div class="wb ex-body"><nav class="ex-side" id="exSide"></nav><div class="ex-list" id="exList"></div></div>
+    <div class="stat" id="exStat"></div>
+  </section>
+  <section class="win exp hide" id="w-bin" style="left:1180px;top:110px;width:700px;height:400px">
+    <div class="tb" data-drag><div class="ti">휴지통</div><div class="ctl"><button data-act="min">─</button><button data-act="max">▢</button><button class="x" data-act="close">✕</button></div></div>
+    <div class="ex-bar"><button id="binEmpty">휴지통 비우기</button><div class="ex-path">휴지통</div></div>
+    <div class="wb"><div class="ex-list" id="binList"></div></div>
+    <div class="stat" id="binStat"></div>
+  </section>
+  <!-- 파일 보기 -->
+  <section class="win view hide" id="w-view" style="left:520px;top:160px;width:640px;height:520px">
+    <div class="tb" data-drag><div class="ti" id="viewTitle"></div><div class="ctl"><button data-act="min">─</button><button data-act="max">▢</button><button class="x" data-act="close">✕</button></div></div>
+    <div class="wb" id="viewBody"></div>
+  </section>
+
+  <!-- 카카오톡 (메신저.js): 친구, 채팅, 더보기 -->
+  <section class="win coco hide" id="w-coco" style="left:1240px;top:60px;width:400px;height:720px">
+    <div class="tb" data-drag><div class="ti" id="cocoTi"></div><div class="ctl"><button data-act="min">─</button><button class="x" data-act="close">✕</button></div></div>
+    <div class="wb ko-body">
+      <nav class="ko-rail" id="koRail"><button data-tab="friends" title="친구"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d='M4 21c1-4.5 4.4-7 8-7s7 2.5 8 7'/></svg></button><button data-tab="chats" title="채팅"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d='M12 4c-4.9 0-9 3.2-9 7.2 0 2.5 1.6 4.7 4.1 6L6 21l4.2-2.4c.6.1 1.2.1 1.8.1 4.9 0 9-3.2 9-7.2S16.9 4 12 4z'/></svg></button><button data-tab="more" title="더보기"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/></svg></button><span class="sp"></span><button data-x="알림" title="알림"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d='M6 16V11a6 6 0 0 1 12 0v5l2 2H4z'/><path d='M10 20a2 2 0 0 0 4 0'/></svg></button><button data-x="설정" title="설정"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d='M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1'/></svg></button></nav>
+      <div class="ko-main"><div class="ko-hd"><b id="koH">친구</b><span></span><button id="koFind" title="검색"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d='M20 20l-4.5-4.5'/></svg></button><button id="koAdd" title="추가"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d='M12 5v14M5 12h14'/></svg></button></div><div class="ko-list" id="koList"></div></div>
+      <div class="ko-pop hide" id="koPop"></div>
+      <div class="ko-wait hide" id="koWait"><i></i></div>
+    </div>
+  </section>
+  <!-- 카카오톡 채팅방 -->
+  <section class="win chat hide" id="w-chat" style="left:1040px;top:120px;width:460px;height:720px">
+    <div class="tb" data-drag><div class="ti" id="chHead"><span id="chAv"></span><span id="chName"></span></div><div class="ctl"><button data-act="min">─</button><button data-act="max">▢</button><button class="x" data-act="close">✕</button></div></div>
+    <div class="ch-tools"><button data-x="대화 검색" title="검색"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d='M20 20l-4.5-4.5'/></svg></button><button data-x="음성통화" title="음성통화"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d='M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z'/></svg></button><button id="chVideo" title="영상통화"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d='M16 10l5-3v10l-5-3'/></svg></button><button data-x="채팅방 메뉴" title="메뉴"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d='M4 7h16M4 12h16M4 17h16'/></svg></button></div>
+    <div class="wb ch-body">
+      <div class="ch-log" id="chLog"></div>
+      <div class="ch-ch" id="chCh"></div>
+      <div class="ch-in"><textarea id="chIn" maxlength="500" spellcheck="false"></textarea>
+        <div class="ch-row"><button data-x="이모티콘" title="이모티콘"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d='M8.5 14.5a4.5 4.5 0 0 0 7 0'/><path d='M9 9.5h.01M15 9.5h.01'/></svg></button><button id="chPic" title="사진"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d='M21 16l-5-5-8 8'/></svg></button><button data-x="파일 보내기" title="파일"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d='M20 11.5l-8 8a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7-7'/></svg></button><span></span><button class="go" id="chGo">전송</button></div></div>
+      <div class="ch-pick hide" id="chPick"></div>
+    </div>
+  </section>
+
+  <!-- 영상통화 (예전 생방송 자리): 상대가 자기 폰으로 건다. 상대의 말은 아래 자막, 문자와 플레이어의 답은 채팅방 창 (플레이어는 마이크가 없다) -->
+  <!-- 사건 도감: 시연판(?자료=시연/...)에만 바탕화면 아이콘이 생긴다 (게임.js 도감준비) -->
+  <section class="win dex hide" id="w-dex" style="left:540px;top:80px;width:800px;height:620px">
+    <div class="tb" data-drag><div class="ti"><span class="dex-ic"></span>사건 도감 (시연용)</div><div class="ctl"><button data-act="min">─</button><button data-act="max">▢</button><button class="x" data-act="close">✕</button></div></div>
+    <div class="wb dex-body"><aside class="dex-list" id="dexList"></aside><div class="dex-main" id="dexMain"></div></div>
+  </section>
+  <section class="win live hide" id="w-live" style="left:470px;top:60px;width:560px;height:800px">
+    <div class="tb" data-drag><div class="ti"><span class="rec"></span><span id="liveTitle">영상통화</span><span class="ct" id="callTime"></span></div><div class="ctl"><button data-act="min">─</button><button class="x" data-act="close">✕</button></div></div>
+    <div class="wb lv-body">
+      <div class="lv-main">
+        <div class="lv-v off" id="lvV"><img id="lvImg" alt=""><div class="lv-n"></div><div class="lv-o"><b id="lvWho"></b><span id="lvDur">00:00</span><span id="lvPlace" hidden></span><span id="lvTime" hidden></span></div><div class="lv-me"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 3l18 18M10 7h4a2 2 0 0 1 2 2v1l4-2.5v8M16 16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2"/></svg>카메라 꺼짐</div><div class="lv-cut" id="lvCut">연결 중</div><p class="lv-cap" id="lvCap"></p></div>
+        <div class="lv-bt"><button class="nomic" id="lvMic" title="마이크 없음"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d='M5 11a7 7 0 0 0 14 0M12 18v3'/><path d="M3 3l18 18"/></svg></button><button data-x="카메라"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="13" height="12" rx="2"/><path d='M16 10l5-3v10l-5-3'/><path d='M3 3l18 18'/></svg></button><button class="hang" id="lvHang"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d='M3 14c5-5 13-5 18 0l-2.5 2.5-3.5-1.5v-3a12 12 0 0 0-6 0v3l-3.5 1.5z'/></svg></button></div>
+      </div>
+      <div id="lvCh" hidden></div>
+    </div>
+  </section>
+  <!-- 걸려 오는 영상통화 -->
+  <div class="ring" id="ring"></div>
+
+  <!-- 정체 모를 창: 뜰 일이 있을 때만 뜬다 -->
+  <div class="odd hide" id="odd"><div class="odd-tb"><span id="oddTi"></span><button disabled>✕</button></div><div class="odd-b"><h3 id="oddH"></h3><p id="oddQ"></p></div><div class="odd-t" id="oddT"><i></i></div><div class="odd-c" id="oddC"></div></div>
+
+  <!-- 시작 메뉴와 와이파이 -->
+  <div class="start hide" id="start"><div class="st-me"><span class="m-av" style="background:#8a8f99">나</span><b></b></div><div class="st-pw"><button id="pw" title="전원"><svg width="18" height="18" viewBox="0 0 16 16"><path d="M8 2v5.5M4.8 4.2a5 5 0 1 0 6.4 0" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><div class="pw-menu hide" id="pwMenu"><button data-pw="save"><svg viewBox="0 0 16 16"><path d="M3 2.5h8l2.5 2.5v8.5H3zM5.5 2.5v3h5v-3M5 13.5v-4h6v4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>저장</button><button data-pw="load"><svg viewBox="0 0 16 16"><path d="M2.5 4.5h4l1.5 1.5h5.5v7h-11zM8 7.5v4M6 9.5l2 2 2-2" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>불러오기</button><hr><button data-pw="sleep"><svg viewBox="0 0 16 16"><path d="M12.5 9.5A5 5 0 0 1 6.5 3.5a5 5 0 1 0 6 6z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>절전</button><button data-pw="off"><svg viewBox="0 0 16 16"><path d="M8 2v5.5M4.8 4.2a5 5 0 1 0 6.4 0" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>시스템 종료</button><button data-pw="restart"><svg viewBox="0 0 16 16"><path d="M12.8 6.5A5 5 0 1 0 13 9M13 3v3.5H9.5" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>다시 시작</button></div></div></div>
+  <div class="wifi hide" id="wifi"><b id="wfName"></b><small id="wfState">연결됨, 보안</small><div class="wf-bar"><i id="wfUse"></i></div><small id="wfUseT"></small></div>
+
+  <div class="os" id="os"><small id="osFrom"><i id="osIc"></i><span id="osApp">알림</span><span>지금</span></small><b id="osT"></b><p id="osP"></p></div>
+  <div class="toast" id="toast"></div>
+  <div class="ctx hide" id="ctx"></div>
+
+  <div class="task">
+    <div class="weather"><span style="font-size:20px">🌫</span><div><b>--°C</b><br>알 수 없음</div></div>
+    <div class="apps">
+      <div class="ap" id="startBtn"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="9.5" height="9.5" fill="#4cc2ff"/><rect x="12.5" y="2" width="9.5" height="9.5" fill="#4cc2ff"/><rect x="2" y="12.5" width="9.5" height="9.5" fill="#4cc2ff"/><rect x="12.5" y="12.5" width="9.5" height="9.5" fill="#4cc2ff"/></svg></div>
+      <div class="ap" data-app="pc"><svg viewBox="0 0 24 24"><path d="M2 6a2 2 0 0 1 2-2h6l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#f2c14e"/><path d="M2 9h20v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" fill="#ffd767"/></svg></div>
+      <div class="ap" data-app="web"><svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#5d5a66"/><circle cx="12" cy="12.5" r="5" fill="none" stroke="#fff" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.8" fill="#fff"/></svg></div>
+      <div class="ap" data-app="coco"><svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#fee500"/><path d="M12 6c-3.9 0-7 2.4-7 5.5 0 2 1.3 3.7 3.3 4.7L7.6 19l3.1-1.8c.4.1.9.1 1.3.1 3.9 0 7-2.4 7-5.5S15.9 6 12 6z" fill="#3c1e1e"/></svg></div>
+      <div class="ap callap" data-app="live"><svg viewBox="0 0 24 24"><rect x="1" y="1" width="22" height="22" rx="6" fill="#2f8f5b"/><path d="M6 8h8a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zm9 3 4-2.5v7L15 13z" fill="#fff"/></svg></div>
+      <div class="ap" data-app="note"><svg viewBox="0 0 24 24"><path d="M5 1h10l5 5v17H5z" fill="#fff"/><path d="M8 10h7M8 14h9M8 18h8" stroke="#8a96a3" stroke-width="1.5"/><rect x="5" y="1" width="2" height="22" fill="#f2c14e"/></svg></div>
+    </div>
+    <div class="tray"><span class="ico">⌃</span><span class="ico wf" id="wfBtn"><svg width="18" height="14" viewBox="0 0 18 14"><path id="wfArc" d="M1 5a12 12 0 0 1 16 0M3.5 7.6a8.4 8.4 0 0 1 11 0M6 10.2a4.8 4.8 0 0 1 6 0" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="12.6" r="1.2" fill="#fff"/><path id="wfX" d="M12 8l5 5M17 8l-5 5" stroke="#ff6b5b" stroke-width="1.8" stroke-linecap="round" style="display:none"/></svg></span><span class="ico vol" id="volBtn">🔊</span><div class="clk"><div id="clk"></div><div id="date"></div></div></div>
+  </div>
+
+  <!-- 컴퓨터가 꺼져 있을 때, 켜질 때, 절전일 때 -->
+  <div class="black" id="black">
+    <div class="lockv"><div><b id="lkT"></b><span id="lkD"></span></div><small id="lkH"></small></div>
+    <div class="logo hide2" id="logo"><i></i><i></i><i></i><i></i></div>
+    <div class="spin hide2" id="boot"><i></i><i></i><i></i><i></i><i></i></div>
+    <p class="bmsg" id="bmsg"></p>
+  </div>
+  <!-- 주인공 대사: 영화 자막처럼 아래 검은 띠 -->
+  <div class="sub" id="sub"><p id="subT"></p></div>
+</div>
+
+<script src="소리.js"></script>
+<script src="게임.js"></script>
+<script src="메신저.js"></script>
+<script src="사건.js"></script>
+</body>
+</html>
