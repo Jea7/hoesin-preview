@@ -11,7 +11,7 @@ const 소리 = (() => {
   };
   addEventListener('pointerdown', () => 준비(), { once: false, passive: true });
   // 소리 파일 자리 (문서/소리 목록.md): 게임/소리/<이름>.mp3|.ogg|.wav 가 있으면 그 파일을 튼다. 없으면 아래 만든 소리
-  const 파일 = {}, 이름들 = ['노크', '문고리', '알림', '타자', '부팅', '끊김', '딸깍', '벨', '팬'];
+  const 파일 = {}, 이름들 = ['노크', '문고리', '형광펜', '알림', '타자', '부팅', '끊김', '딸깍', '벨', '팬'];
   // 폴더 목록을 한 번만 읽는다 (서버가 폴더 안 파일 이름을 보여 줌). 파일로 열었으면 그냥 만든 소리
   fetch('소리/').then(r => r.ok ? r.text() : '').then(h => { const 있음 = new Set([...h.matchAll(/href="([^"]+)"/g)].map(m => decodeURIComponent(m[1]))); 이름들.forEach(n => { const f = ['mp3', 'ogg', 'wav'].map(끝 => `${n}.${끝}`).find(f => 있음.has(f)); if (f) 파일[n] = `소리/${f}`; }); }).catch(() => {});
   let 팬소리 = null;
@@ -39,6 +39,16 @@ const 소리 = (() => {
     노크() { if (틀기('노크')) return; 톤(70, .18, 'sine', .9); 잡음(.12, 1.2, 400); },
     // 문고리를 돌려도 안 열림: 철컥철컥 (걸쇠에 걸리는 쇳소리 여러 번)
     문고리() { if (틀기('문고리')) return; [0, .16, .42, .56].forEach(t => { 잡음(.05, .9, 3800, t); 톤(1900, .05, 'square', .03, t); 톤(110, .08, 'sine', .5, t + .01); }); },
+    // 형광펜 긋는 소리: 종이 위를 슥 (높아지는 사각거림). 초: 긋는 동안만큼 (기본 0.5초)
+    형광펜(초 = .5) {
+      if (틀기('형광펜')) return; const c = 준비(); if (!c) return;
+      const t = c.currentTime, 길이 = Math.max(.3, Math.min(4, 초)), n = c.createBuffer(1, c.sampleRate * 길이, c.sampleRate), d = n.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (.6 + .4 * Math.sin(i / c.sampleRate * 90));
+      const s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+      s.buffer = n; f.type = 'bandpass'; f.Q.value = 1.4; f.frequency.setValueAtTime(1600, t); f.frequency.linearRampToValueAtTime(3600, t + 길이);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.35, t + .06); g.gain.setValueAtTime(.35, t + 길이 - .12); g.gain.linearRampToValueAtTime(0, t + 길이);
+      s.connect(f); f.connect(g); g.connect(큰소리); s.start(t); s.stop(t + 길이);
+    },
     알림() { if (틀기('알림')) return; 톤(880, .25, 'sine', .12); 톤(1320, .35, 'sine', .08, .09); },
     타자() { if (틀기('타자')) return; 잡음(.03, .25, 2500); },
     부팅() { if (틀기('부팅')) return; [523, 659, 784, 1047].forEach((h, i) => 톤(h, .9, 'triangle', .06, i * .12)); },

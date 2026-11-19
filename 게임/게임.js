@@ -273,9 +273,36 @@ $('#stage').addEventListener('contextmenu', e => {
 });
 
 // ── 커뮤니티 ──
-const 맨글 = s => s.replace(/\{[ca]\|([^|]+)\|[^}]+\}/g, '$1');
+const 맨글 = s => s.replace(/\{[ca]\|([^|]+)\|[^}]+\}/g, '$1').replace(/==(.+?)==/g, '$1');
 const 막음 = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const 보임글 = s => 막음(맨글(s));
+// 형광펜: 툴의 에타 본문에 ==이렇게== 감싼 부분. 글을 처음 열면 자막이 끝난 뒤 형광펜 소리와 함께 첫 글자부터 한 글자씩 칠해진다 (판.형광 에 그은 글 id).
+// 글자마다 <span> 이라 칠하는 차례를 정할 수 있다. 복사하면 == 는 안 따라온다
+const 형광글 = s => s.replace(/\{[ca]\|([^|]+)\|[^}]+\}/g, '$1').split(/==(.+?)==/).map((조각, i) => i % 2 ? `<mark class="hl">${[...조각].map(c => `<span>${막음(c)}</span>`).join('')}</mark>` : 막음(조각)).join('');
+const 형광칸 = () => [...document.querySelectorAll('#cmMain .cm-text mark.hl')];
+// 사건이 한 단계 끝날 때마다 보던 글을 다시 그린다. 칠하는 도중이면 칠한 데까지 바로 칠해 두고 이어서 칠한다
+let 긋는중 = null; // { id, 칠한: 지금까지 칠한 글자 수 }
+const 칠한데까지 = n => 형광칸().flatMap(m => [...m.children]).forEach((c, i) => { if (i < n && !c.classList.contains('on')) { c.style.transition = 'none'; c.classList.add('on'); } });
+async function 형광펜긋기(p) {
+  const 칠할 = 형광칸(); if (!칠할.length) return;
+  if (긋는중?.id === p.id) { 칠한데까지(긋는중.칠한); return; }
+  if (판.형광?.[p.id]) { 칠할.forEach(m => m.classList.add('done')); return; } // 한 번 그은 글은 바로 칠해져 있다
+  await 쉼(빠름 ? 50 : 2000); await 자막줄; // 글을 연 뒤 사건(그 글을 읽은 뒤)의 자막이 끝나기를 기다린다
+  if (연글 !== p || 긋는중?.id === p.id || 판.형광?.[p.id]) return; // 다른 글로 넘어갔거나, 이미 긋는 중
+  (판.형광 ||= {})[p.id] = 1; 긋는중 = { id: p.id, 칠한: 0 };
+  const 한글자 = 빠름 ? 5 : 40; // 한 글자 칠하는 데 걸리는 ms
+  try {
+    for (const 수 of 칠할.map(m => m.children.length)) { // 형광펜 한 줄씩 차례로
+      소리.형광펜(수 * 한글자 / 1000 + .15);
+      for (let k = 0; k < 수; k++) {
+        if (연글 !== p) return; // 다른 글로 넘어감 (다음에 열면 칠해져 있다)
+        const c = 형광칸().flatMap(m => [...m.children])[긋는중.칠한]; // 다시 그려졌어도 지금 화면의 그 글자
+        c?.classList.add('on'); 긋는중.칠한++; await 쉼(한글자);
+      }
+      await 쉼(빠름 ? 30 : 250);
+    }
+  } finally { 긋는중 = null; }
+}
 function 풀기(p) {
   let q = p;
   // 판들: 조건이 맞는 첫 판의 본문과 댓글로 바뀐다
@@ -403,12 +430,13 @@ function 글보기(id) {
   $('#cmMain').innerHTML = `<section class="cm-card"><div class="cm-view">
     <button class="cm-back" data-board="${지금판}">← ${판이름(지금판)}</button>
     <div class="cm-who"><span class="pf"></span><div>${쓴이칸}<small>${p.날} ${p.시} · ${판이름(p.판)}</small></div></div>
-    <h1>${막음(p.제목)}</h1><div class="cm-text">${보임글(p.본문)}${p.사진 ? `<img src="${p.사진}" alt="">` : ''}</div>
+    <h1>${막음(p.제목)}</h1><div class="cm-text">${형광글(p.본문)}${p.사진 ? `<img src="${p.사진}" alt="">` : ''}</div>
     ${수(p)}
     <div class="cm-acts"><button>공감</button><button id="scrapBtn" class="${판.스크랩.has(p.id) ? 'on' : ''}">스크랩</button>${p.내것 || !쪽지됨(글쓴이id(p)) ? '' : '<button id="dmBtn">쪽지</button>'}<button>신고</button></div></div>
     <div class="cm-cms" id="cms">${p.댓글.map((c, i) => 댓글칸(p, c, i, 쓴(c))).join('') || '<p class="cm-none">아직 댓글이 없습니다</p>'}</div>
     <div class="cm-cw"><input id="cIn" placeholder="${판.끊김 ? '인터넷에 연결되어 있지 않습니다' : '댓글을 입력하세요'}" ${판.끊김 ? 'disabled' : ''} maxlength="200"><button class="cm-btn" id="cGo" ${판.끊김 ? 'disabled' : ''}>등록</button></div></section>`;
   $('#cmMain').scrollTop = 0;
+  형광펜긋기(p);
   $('#scrapBtn').onclick = () => 스크랩(p);
   $('#dmBtn') && ($('#dmBtn').onclick = () => 쪽지열기(글쓴이id(p), p.고닉 || `익명 (${p.제목.slice(0, 12)})`, true));
   const 보내기 = () => { const v = $('#cIn').value.trim(); if (v) 댓글쓰기(p, v); };
@@ -873,7 +901,7 @@ async function AI동의() {
 // ── 시작 ──
 async function 시작() {
   // ?자료=시험/메신저 시험 → 데이터/시험/메신저 시험.json (시험용)
-  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mwk88gyn`)).json();
+  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mwn3wvju`)).json();
   자료.메신저 ||= {}; await 쉼(0);
   $('.st-me b').textContent = `${자료.학교.기숙사} · ${자료.학교.방}`;
   $('#urlHost').textContent = 자료.학교.앱주소; $('#appIcT').textContent = 자료.학교.앱; $('#favT').textContent = [...(자료.학교.앱 || '?')][0]; $('#wfName').textContent = `${자료.학교.기숙사}-5F`;

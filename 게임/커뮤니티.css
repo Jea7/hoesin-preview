@@ -61,6 +61,11 @@ img { display: block; }
 .cm-who b { font-size: 14px; } .cm-who small { display: block; font-size: 12px; color: var(--faint); }
 .cm-view h1 { font-size: 21px; font-weight: 800; letter-spacing: -.03em; margin: 16px 0 8px; }
 .cm-text { font-size: 15.5px; line-height: 1.75; white-space: pre-line; }
+/* 형광펜 (본문의 ==글==): 첫 글자부터 한 글자씩, 글자마다 왼쪽에서 오른쪽으로 칠해진다 (드래그하는 느낌). 글자 아래쪽 2/3 쯤만 칠해 손으로 그은 느낌 */
+.cm-text mark.hl { color: inherit; background: none; }
+.cm-text mark.hl > span { background: linear-gradient(transparent 38%, rgba(255, 226, 64, .85) 38%, rgba(255, 226, 64, .85) 94%, transparent 94%) no-repeat 0 0 / 0% 100%; transition: background-size .07s linear; }
+.cm-text mark.hl > span.on, .cm-text mark.hl.done > span { background-size: 100% 100%; }
+.cm-text mark.hl.done > span { transition: none; }
 .cm-text img { width: 100%; max-height: 360px; object-fit: cover; border-radius: 10px; margin-top: 12px; filter: grayscale(.4); }
 .cm-view .cm-cnt { margin: 16px 0 12px; font-size: 13px; }
 .cm-acts { display: flex; gap: 8px; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
