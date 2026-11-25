@@ -922,7 +922,7 @@ async function AI동의() {
 // ── 시작 ──
 async function 시작() {
   // ?자료=시험/메신저 시험 → 데이터/시험/메신저 시험.json (시험용)
-  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mww1cjji`)).json();
+  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mww2qnh1`)).json();
   자료.메신저 ||= {}; await 쉼(0);
   $('.st-me b').textContent = `${자료.학교.기숙사} · ${자료.학교.방}`;
   $('#urlHost').textContent = 자료.학교.앱주소; $('#appIcT').textContent = 자료.학교.앱; $('#favT').textContent = [...(자료.학교.앱 || '?')][0]; $('#wfName').textContent = `${자료.학교.기숙사}-5F`;
