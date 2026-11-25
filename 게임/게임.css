@@ -263,8 +263,8 @@ html, body { height: 100%; overflow: hidden; background: #000; }
 .sub p.on { opacity: 1; }
 .sub p.on::after { content: '▏'; color: #888; animation: dot 1s steps(1) infinite; }
 /* ≫ SKIP: 오른쪽 아래. 자막 띠가 있으면 띠 안, 없으면 작업 표시줄 위. 보이는 동안 알림·전화 창은 그 위로 */
-.skip { position: absolute; right: 24px; bottom: 60px; z-index: 9900; display: none; padding: 7px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,.35); background: rgba(0,0,0,.55); color: #f2f2f2; font-size: 15px; font-weight: 700; letter-spacing: .06em; cursor: pointer; }
-.skip:hover { background: rgba(0,0,0,.8); border-color: rgba(255,255,255,.7); }
+.skip { position: absolute; right: 32px; bottom: 60px; z-index: 9900; display: none; padding: 4px 0; border: 0; background: none; color: rgba(242,242,242,.7); font-size: 16px; font-weight: 700; letter-spacing: .08em; cursor: pointer; }
+.skip:hover { color: #fff; }
 .skip.on { display: block; }
 #stage.sub-on .skip { bottom: 42px; }
 #stage.skip-on:not(.sub-on) .os { bottom: 104px; }
