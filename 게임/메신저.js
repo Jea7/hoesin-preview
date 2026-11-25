@@ -375,11 +375,14 @@ function 손떨림(v) {
 async function 통화(id) {
   const c = 메().통화[id], f = 친구(c.친구), w = 창('live'), v = $('#lvV');
   통화중 = { id, f: c.친구, 시작: Date.now() }; 코().통화[id] = '중';
-  Object.assign(w.style, { left: '470px', top: '60px', width: '560px', height: '800px' });
+  v.classList.toggle('wide', !!c.가로);
+  const 자리 = c.가로 ? { left: '300px', top: '90px', width: '880px', height: '680px' }
+    : { left: '470px', top: '60px', width: '560px', height: '800px' };
+  Object.assign(w.style, 자리);
   $('#liveTitle').textContent = `${f.이름} · 영상통화`; $('#lvCut').textContent = '연결 중'; $('#lvWho').textContent = f.이름; $('#lvDur').textContent = '00:00';
   $('#lvImg').removeAttribute('src'); $('#lvPlace').textContent = ''; $('#lvCap').textContent = '';
   v.classList.add('off'); 열('live');
-  연채팅 = c.친구; 열('chat'); Object.assign(창('chat').style, { left: '1050px', top: '60px' }); 앞('live');
+  연채팅 = c.친구; 열('chat'); Object.assign(창('chat').style, { left: c.가로 ? '1200px' : '1050px', top: 자리.top }); 앞('live');
   코코그리기();
   const 시계칸 = setInterval(() => { const s = Math.floor((Date.now() - 통화중.시작) / 1000); $('#callTime').textContent = $('#lvDur').textContent = `${둘(Math.floor(s / 60))}:${둘(s % 60)}`; }, 500);
   손떨림(v);
@@ -427,7 +430,7 @@ async function 걸기(id) {
   while (Date.now() < 끝 && !취소) { 소리.벨(); await 쉼(Math.min(빠름 ? 300 : 2200, Math.max(50, 끝 - Date.now()))); }
   $('#ring').classList.remove('on'); 울리는 = null;
   if (취소) { 시스템(id, '영상통화 취소'); return; }
-  if (!c) { 시스템(id, '통신이 불안정해서 연결하지 못했습니다'); return; } // 정해 둔 상황 밖에서 걸면 (선배 2026-11-04)
+  if (!c) { 시스템(id, '통신이 불안정해서 연결하지 못했습니다'); if (typeof 사건안걸림 === 'function') 사건안걸림(id); return; } // 정해 둔 상황 밖에서 걸면 (선배 2026-11-04). 사건 "전화가 안 걸렸을 때" (2026-11-23)
   if (c.결과 === '받음' && c.첫장면) { 통화(cid); return; }
   코().통화[cid] = '안받음'; // 조건 "통화:C=안받음" 이 맞는다 ("통화:C" 는 받아서 통화한 것만)
   시스템(id, c.결과 === '거절' ? '상대가 영상통화를 거절했습니다' : '영상통화 · 응답 없음');

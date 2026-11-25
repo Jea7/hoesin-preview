@@ -287,7 +287,7 @@ async function 형광펜긋기(p) {
   const 칠할 = 형광칸(); if (!칠할.length) return;
   if (긋는중?.id === p.id) { 칠한데까지(긋는중.칠한); return; }
   if (판.형광?.[p.id]) { 칠할.forEach(m => m.classList.add('done')); return; } // 한 번 그은 글은 바로 칠해져 있다
-  await 쉼(빠름 ? 50 : 2000); await 자막줄; // 글을 연 뒤 사건(그 글을 읽은 뒤)의 자막이 끝나기를 기다린다
+  await 쉼(빠름 ? 400 : 900); await 자막줄; // 글을 연 뒤 사건(그 글을 읽은 뒤, 0.5초 뒤)이 자막을 걸면 그 자막이 끝나기를 기다린다
   if (연글 !== p || 긋는중?.id === p.id || 판.형광?.[p.id]) return; // 다른 글로 넘어갔거나, 이미 긋는 중
   (판.형광 ||= {})[p.id] = 1; 긋는중 = { id: p.id, 칠한: 0 };
   const 한글자 = 빠름 ? 5 : 40; // 한 글자 칠하는 데 걸리는 ms
@@ -306,7 +306,17 @@ async function 형광펜긋기(p) {
 function 풀기(p) {
   let q = p;
   // 판들: 조건이 맞는 첫 판의 본문과 댓글로 바뀐다
-  const 판1 = (p.판들 || []).find(x => 조건맞음(x.조건)); if (판1) q = { ...q, 본문: 판1.본문 ?? q.본문, 댓글: 판1.댓글 ?? q.댓글 };
+  const 판번호 = (p.판들 || []).findIndex(x => 조건맞음(x.조건));
+  if (판번호 !== -1) {
+    const 판1 = p.판들[판번호];
+    let 댓글 = 판1.댓글 ?? p.댓글;
+    // 새 게시글의 판이 바뀌며 덧붙은 댓글은 전환 시각을 기록한다. 기존 댓글의 시각은 유지한다.
+    if (p.올라옴 && 댓글.slice(p.댓글.length).some(c => !c[2])) {
+      const [날, 시] = 판.올라온[`댓글:${p.id}:${판번호}`] ||= [오늘날(), 지금시각()];
+      댓글 = 댓글.map((c, i) => i < p.댓글.length || c[2] ? c : [c[0], c[1], 시, c[3], c[4], c[5], c[6] ?? 0, `${날} `]);
+    }
+    q = { ...p, 본문: 판1.본문 ?? p.본문, 댓글 };
+  }
   return 판.더한[p.id] ? { ...q, 댓글: [...q.댓글, ...판.더한[p.id]] } : q;
 }
 // "조건": 모두 맞아야 한다 (글이 보임, 메신저 흐름과 전화가 옴). 앞에 ! 를 붙이면 반대
@@ -339,7 +349,18 @@ const 글들 = () => 글잠깐 || 글계산();
 const 한번에 = f => { if (글잠깐) return f(); 글잠깐 = 글계산(); try { return f(); } finally { 글잠깐 = null; } };
 const 글계산 = () => [...자료.글.filter(p => (!p.새날 || p.새날 <= 오늘().날) && !판숨음(p.판) && 조건맞음(p.조건)), ...판.내글].map(풀기).map(올라온시각);
 let 새로올라옴 = false;
-setInterval(() => { if (!판.켜짐 || !자료?.글) return; 글들(); if (새로올라옴) { 새로올라옴 = false; 판목록(); } }, 1000); // 조건이 맞은 순간 올라온 시각을 찍어 둔다 (게시판을 늦게 열어도 그 시각)
+// 조건이 맞은 순간 올라온 시각을 기록하고, 열어 둔 목록에도 새 글을 보인다.
+setInterval(() => {
+  if (!판.켜짐 || !자료?.글) return;
+  한번에(() => {
+    if (!새로올라옴) return;
+    새로올라옴 = false;
+    if (쪽 !== 'board') { 판목록(); return; }
+    const 스크롤 = $('#cmMain').scrollTop;
+    판보기몸(지금판);
+    $('#cmMain').scrollTop = 스크롤;
+  });
+}, 1000);
 const 찾기 = id => 글들().find(p => p.id === +id);
 const 사람수 = p => p.댓글수 ?? p.댓글.filter(c => c[4] !== 0).length;
 const 수 = p => `<span class="cm-cnt"><span class="g">공감 ${p.공감}</span><span class="c">댓글 ${사람수(p)}</span><span class="s">스크랩 ${p.스크랩 + (판.스크랩.has(p.id) ? 1 : 0)}</span></span>`;
@@ -421,7 +442,7 @@ function 글보기(id) {
   if (!판.불러온.has(p.id) && !p.내것) {
     if (판.끊김) { 오프라인(p); return; }
     판.불러온.add(p.id); 판.읽음++; 와이파이그리기(); 시간가기('글읽기');
-    setTimeout(() => 사건읽음(p.id), 빠름 ? 300 : 1800);
+    setTimeout(() => 사건읽음(p.id), 빠름 ? 300 : 100); // "그 글을 읽은 뒤" 사건은 글을 열자마자. 자막 띠가 뜨는 0.45초를 더해 0.5초쯤 글자가 보인다 (2026-11-19, 1.8초에서 줄임)
     if (판.읽음 >= 자료.설정.와이파이) setTimeout(끊기, 빠름 ? 400 : 2600);
   }
   연글 = p; 쪽 = 'post'; 오프라인(0); 판목록(); 주소바꿈(p);
@@ -901,7 +922,7 @@ async function AI동의() {
 // ── 시작 ──
 async function 시작() {
   // ?자료=시험/메신저 시험 → 데이터/시험/메신저 시험.json (시험용)
-  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mwn3wvju`)).json();
+  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mww1cjji`)).json();
   자료.메신저 ||= {}; await 쉼(0);
   $('.st-me b').textContent = `${자료.학교.기숙사} · ${자료.학교.방}`;
   $('#urlHost').textContent = 자료.학교.앱주소; $('#appIcT').textContent = 자료.학교.앱; $('#favT').textContent = [...(자료.학교.앱 || '?')][0]; $('#wfName').textContent = `${자료.학교.기숙사}-5F`;

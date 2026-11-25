@@ -8,7 +8,6 @@ html, body { height: 100%; overflow: hidden; background: #000; }
 .ic:hover { background: rgba(255,255,255,.12); }
 .ic.sel { background: rgba(120,170,255,.28); border-color: rgba(160,200,255,.5); }
 .ic svg { width: 46px; height: 46px; filter: drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
-.odd-ic span { display: inline-block; transform: scaleX(-1); }
 .ic .nm { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-all; }
 .ic.sel .nm { -webkit-line-clamp: unset; }
 .badge { position: absolute; top: 2px; right: 14px; min-width: 18px; height: 18px; border-radius: 9px; background: #e5484d; color: #fff; font-size: 11px; display: none; place-items: center; padding: 0 5px; text-shadow: none; }
@@ -43,9 +42,8 @@ html, body { height: 100%; overflow: hidden; background: #000; }
 .url span { color: #6b7078; }
 .site { height: 100%; }
 
-/* 이상하게 바뀐 커뮤니티: 색이 빠지고 로고가 뒤집혀 있다 */
+/* 커뮤니티 앱 색상 */
 .cm-site { --cr: #5d5a66; --cr-soft: #eeedf1; }
-.cm-logo b { width: max-content; transform: scaleX(-1); }
 .offline { height: 100%; display: grid; place-content: center; justify-items: start; gap: 10px; padding: 0 30%; background: #fff; color: #3c4043; }
 .offline svg { margin-bottom: 18px; }
 .offline h3 { font-size: 22px; font-weight: 500; }
@@ -339,7 +337,7 @@ html, body { height: 100%; overflow: hidden; background: #000; }
 .ch-ch.on { display: flex; }
 .ch-ch button { min-height: 38px; padding: 8px 12px; border-radius: 10px; background: #fff; border: 1px solid #e1e1e1; color: #191919; font-size: 14px; text-align: left; }
 .ch-ch button:hover { background: #fffbd6; border-color: #e6c800; }
-.ch-ch button.info { border-color: #6aa394; } .ch-ch button.info::before { content: '정보 · '; color: #2f7f6c; font-size: 12px; font-weight: 600; }
+/* 정보가 있어야 보이는 선택지(.info)도 다른 선택지와 똑같이 보인다. "정보 ·" 표시를 붙이면 답이 뻔해져서 뺐다 (2026-11-23) */
 #dmAsk { position: relative; } #dmAsk.on button { text-align: left; }
 #dmAsk .ch-tm { top: -1px; }
 .ch-tm { position: absolute; left: 0; top: 0; height: 3px; background: #e6b800; }
@@ -630,6 +628,9 @@ html, body { height: 100%; overflow: hidden; background: #000; }
 .lv-bt button:hover { background: rgba(255,255,255,.26); }
 .lv-bt button.hang { background: #f04438; } .lv-bt button.hang:hover { background: #f55a4f; }
 .lv-cut { font-weight: 500; letter-spacing: 0; color: #9aa0a8; }
+.lv-v.wide img { inset: 48px 0 auto; width: 100%; height: calc(100% - 144px); object-fit: contain; }
+.lv-v.wide .lv-me { top: 9px; right: 12px; width: auto; height: 28px; padding: 0 8px; display: flex; align-items: center; gap: 6px; }
+.lv-v.wide .lv-me svg { width: 14px; height: 14px; }
 
 /* 사건 도감 (시연판 전용 앱) */
 .dex .tb { background: #f3f3f3; }
