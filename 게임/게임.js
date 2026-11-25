@@ -13,6 +13,17 @@ const $ = s => document.querySelector(s);
 const 쉼 = ms => new Promise(r => setTimeout(r, ms));
 const 물음표 = new URLSearchParams(location.search);
 const 빠름 = 물음표.has('fast');
+// ── ≫ SKIP (오른쪽 아래, 2026-11-25): **1일차 초반 이야기에서만** — 노트북을 처음 켜기 전 오프닝 자막과 검은 화면의 독백.
+//    그 뒤(카톡, 통화, 다른 날의 자막)에는 버튼이 안 나온다. 사건의 "기다림"도 건너뛰지 않는다
+//    표 = 건너뛸 수 있는 묶음 하나 (자막 한 번). 누르면 지금 도는 묶음들을 끝까지 넘긴다
+const 넘길묶음 = new Set();
+const 초반이야기 = () => 날 === 0 && !판?.켜짐; // 1일차, 노트북이 켜지기 전
+function 넘김버튼() { const 있음 = 넘길묶음.size > 0; document.getElementById('skipBtn')?.classList.toggle('on', 있음); document.getElementById('stage')?.classList.toggle('skip-on', 있음); }
+function 넘김시작() { const 표 = { 넘김: false, 깨움: new Set() }; if (초반이야기()) { 넘길묶음.add(표); 넘김버튼(); } return 표; }
+function 넘김끝(표) { 넘길묶음.delete(표); 넘김버튼(); }
+const 넘길쉼 = (ms, 표) => 표?.넘김 ? Promise.resolve() : new Promise(r => { const 끝 = () => { clearTimeout(t); 표?.깨움.delete(끝); r(); }; const t = setTimeout(끝, ms); 표?.깨움.add(끝); });
+function 넘기기() { for (const 표 of 넘길묶음) { 표.넘김 = true; [...표.깨움].forEach(f => f()); } }
+document.getElementById('skipBtn')?.addEventListener('click', e => { e.stopPropagation(); 넘기기(); });
 const 둘 = n => String(n).padStart(2, '0');
 const 고름 = a => a?.length ? a[Math.floor(Math.random() * a.length)] : undefined;
 const 저장키 = 'hoesin-save-17' + (물음표.get('자료') ? ':' + 물음표.get('자료') : ''); // 시험 자료(?자료=)로 켜면 진짜 저장을 안 덮는다
@@ -149,15 +160,16 @@ function 띄움(어디, 제목, 글, 누르면) {
 // ── 주인공 1 대사: 영화 자막, 타이핑하듯 ──
 let 자막줄 = Promise.resolve();
 let 자막수 = 0; const 자막중 = () => 자막수 > 0; // 줄을 서 있는 독백도 센다
-function 자막(줄) { if (!줄?.length) return 자막줄; 자막수++; return 자막줄 = 자막줄.then(async () => { try {
-  const s = $('#sub'), t = $('#subT'); s.classList.add('on'); $('#stage').classList.add('sub-on'); await 쉼(빠름 ? 60 : 450); // sub-on: 알림, 전화 창을 검은 띠 위로 올린다
+function 자막(줄) { if (!줄?.length) return 자막줄; 자막수++; return 자막줄 = 자막줄.then(async () => { const 표 = 넘김시작(); try {
+  const s = $('#sub'), t = $('#subT'); s.classList.add('on'); $('#stage').classList.add('sub-on'); await 넘길쉼(빠름 ? 60 : 450, 표); // sub-on: 알림, 전화 창을 검은 띠 위로 올린다
   for (const x of 줄) {
+    if (표.넘김) break;
     t.textContent = ''; t.classList.add('on');
-    for (let i = 0; i < x.length; i++) { t.textContent = x.slice(0, i + 1); if (x[i] !== ' ' && x[i] !== '…' && i % 2 === 0) 소리.타자(); await 쉼(빠름 ? 8 : x[i] === '…' ? 220 : 70); }
-    await 쉼(빠름 ? 200 : 900 + x.length * 30); t.classList.remove('on'); await 쉼(빠름 ? 60 : 260);
+    for (let i = 0; i < x.length && !표.넘김; i++) { t.textContent = x.slice(0, i + 1); if (x[i] !== ' ' && x[i] !== '…' && i % 2 === 0) 소리.타자(); await 넘길쉼(빠름 ? 8 : x[i] === '…' ? 220 : 70, 표); }
+    await 넘길쉼(빠름 ? 200 : 900 + x.length * 30, 표); t.classList.remove('on'); await 넘길쉼(빠름 ? 60 : 260, 표);
   }
-  s.classList.remove('on'); await 쉼(빠름 ? 40 : 300);
-} finally { 자막수--; if (!자막수) $('#stage').classList.remove('sub-on'); } }); }
+  t.classList.remove('on'); s.classList.remove('on'); await 쉼(빠름 ? 40 : 300);
+} finally { 넘김끝(표); 자막수--; if (!자막수) $('#stage').classList.remove('sub-on'); } }); }
 
 // ── 대화 상자. 정체 모를 창은 제목이 없다. { 제목 } 이면 시스템 창, { 섞기 } 이면 가끔 버튼 자리가 바뀐다 ──
 let 창줄 = Promise.resolve();
@@ -922,7 +934,7 @@ async function AI동의() {
 // ── 시작 ──
 async function 시작() {
   // ?자료=시험/메신저 시험 → 데이터/시험/메신저 시험.json (시험용)
-  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mww4gckj`)).json();
+  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mww4xzol`)).json();
   자료.메신저 ||= {}; await 쉼(0);
   $('.st-me b').textContent = `${자료.학교.기숙사} · ${자료.학교.방}`;
   $('#urlHost').textContent = 자료.학교.앱주소; $('#appIcT').textContent = 자료.학교.앱; $('#favT').textContent = [...(자료.학교.앱 || '?')][0]; $('#wfName').textContent = `${자료.학교.기숙사}-5F`;
