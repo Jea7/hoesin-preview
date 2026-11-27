@@ -67,8 +67,17 @@ function 앞(id) {
   const w = 창(id); w.style.zIndex = ++층; w.classList.add('top');
   작업줄();
 }
+// 더블클릭의 첫 클릭으로 열린 창에 둘째 클릭이 떨어져 그 창 버튼이 눌리지 않게, 막 열린 창 안의 연달은 클릭(detail ≥ 2)은 버린다 (2026-11-27)
+const 막열림 = new Map();
+document.addEventListener('click', e => {
+  if (e.detail < 2) return;
+  const w = e.target.closest?.('.win'); if (!w) return;
+  if (Date.now() - (막열림.get(w) || 0) < 600) { e.preventDefault(); e.stopImmediatePropagation(); }
+}, true);
 function 열(id) {
-  const w = 창(id); if (!w || !판.켜짐) return; w.classList.remove('hide', 'min'); 앞(id);
+  const w = 창(id); if (!w || !판.켜짐) return;
+  if (w.classList.contains('hide') || w.classList.contains('min')) 막열림.set(w, Date.now());
+  w.classList.remove('hide', 'min'); 앞(id);
   if (id === 'pc') 탐색('pc'); if (id === 'bin') 휴지통그리기(); if (id === 'coco' || id === 'chat') 코코그리기();
 }
 function 작업줄() {
@@ -934,7 +943,7 @@ async function AI동의() {
 // ── 시작 ──
 async function 시작() {
   // ?자료=시험/메신저 시험 → 데이터/시험/메신저 시험.json (시험용)
-  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mwxb963r`)).json();
+  자료 = window.자료 || await (await fetch(`../데이터/${물음표.get('자료') || '1장'}.json?v=mwz2jzhs`)).json();
   자료.메신저 ||= {}; await 쉼(0);
   $('.st-me b').textContent = `${자료.학교.기숙사} · ${자료.학교.방}`;
   $('#urlHost').textContent = 자료.학교.앱주소; $('#appIcT').textContent = 자료.학교.앱; $('#favT').textContent = [...(자료.학교.앱 || '?')][0]; $('#wfName').textContent = `${자료.학교.기숙사}-5F`;
